@@ -115,7 +115,7 @@ const recognition = new SpeechRecognition();
 
 recognition.lang = "pt-BR";
 recognition.continuous = true;
-recognition.interimResults = true; // 🔥 TEMPO REAL
+recognition.interimResults = true; // tempo real
 
 let timeoutLegenda;
 
@@ -124,27 +124,24 @@ document.getElementById("start").onclick = () => {
 }
 
 recognition.onresult = (event) => {
-    let textoFinal = "";
     let textoParcial = "";
 
     for(let i = event.resultIndex; i < event.results.length; i++){
         let transcript = event.results[i][0].transcript;
 
         if(event.results[i].isFinal){
-            textoFinal += transcript + " ";
+            mostrarLegenda(transcript, true); // envia só frase final para VLibras
         } else {
             textoParcial += transcript;
         }
     }
 
-    let texto = (textoFinal + textoParcial).trim();
-
-    if(texto.length > 0){
-        mostrarLegenda(texto);
+    if(textoParcial.length > 0){
+        mostrarLegenda(textoParcial, false); // mostra só visualmente
     }
 }
 
-function mostrarLegenda(texto){
+function mostrarLegenda(texto, enviarParaVLibras){
     const legenda = document.getElementById("legenda");
 
     if(texto.length > 60){
@@ -163,7 +160,10 @@ function mostrarLegenda(texto){
         legenda.classList.remove("show");
     },3500);
 
-    legenda.click();
+    // só dispara VLibras se for frase final
+    if(enviarParaVLibras){
+        legenda.click();
+    }
 }
 
 recognition.onend = () => {
