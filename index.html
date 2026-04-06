@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Tradutor Voz → Libras</title>
+<title>Tradu→ Libras</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
@@ -115,11 +115,11 @@ const recognition = new SpeechRecognition();
 
 recognition.lang = "pt-BR";
 recognition.continuous = true;
-recognition.interimResults = true; // tempo real
+recognition.interimResults = true; // para legenda em tempo real
 
 let timeoutLegenda;
 
-// fila para frases finais do VLibras
+// fila de frases para o VLibras
 let filaVLibras = [];
 let processandoVLibras = false;
 
@@ -134,7 +134,7 @@ recognition.onresult = (event) => {
         let transcript = event.results[i][0].transcript;
 
         if(event.results[i].isFinal){
-            mostrarLegenda(transcript, true); // envia só frase final para VLibras
+            mostrarLegenda(transcript, true); // envia só frase final
         } else {
             textoParcial += transcript;
         }
@@ -145,6 +145,7 @@ recognition.onresult = (event) => {
     }
 }
 
+// mostra a legenda e adiciona à fila se necessário
 function mostrarLegenda(texto, enviarParaVLibras){
     const legenda = document.getElementById("legenda");
 
@@ -170,21 +171,38 @@ function mostrarLegenda(texto, enviarParaVLibras){
     }
 }
 
+// processa a fila do VLibras, quebrando frases longas em pedaços
 function processarFilaVLibras(){
     if(processandoVLibras || filaVLibras.length === 0) return;
 
     processandoVLibras = true;
-    const frase = filaVLibras.shift();
+    let frase = filaVLibras.shift();
 
-    const legenda = document.getElementById("legenda");
-    legenda.innerText = frase;
-    legenda.click();
+    // quebra frase em pedaços de ~8 palavras
+    const palavras = frase.split(" ");
+    const pedaços = [];
+    for(let i=0; i<palavras.length; i+=8){
+        pedaços.push(palavras.slice(i,i+8).join(" "));
+    }
 
-    // espera 3.5s antes de processar a próxima frase
-    setTimeout(()=>{
-        processandoVLibras = false;
-        processarFilaVLibras();
-    }, 3500);
+    function enviarPedaço(index){
+        if(index >= pedaços.length){
+            processandoVLibras = false;
+            processarFilaVLibras(); // próxima frase da fila
+            return;
+        }
+
+        const legenda = document.getElementById("legenda");
+        legenda.innerText = pedaços[index];
+        legenda.click();
+
+        // espera ~2s por pedaço (ajuste se necessário)
+        setTimeout(()=>{
+            enviarPedaço(index+1);
+        }, 2000);
+    }
+
+    enviarPedaço(0);
 }
 
 recognition.onend = () => {
