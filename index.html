@@ -87,8 +87,12 @@ body{
     opacity:1;
 }
 
-/* VLibras não travar clique */
+/* VLibras: permite clique apenas nos botões e wrapper */
 [vw] {
+    pointer-events: auto;
+}
+
+[vw] > * {
     pointer-events: none;
 }
 
