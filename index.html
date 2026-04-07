@@ -30,13 +30,11 @@ h1{
     font-size: 3rem;
     font-weight: 700;
     margin-bottom: 10px;
-    text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
 }
 
 p{
     font-size: 1.25rem;
     margin-bottom: 40px;
-    color: rgba(255,255,255,0.85);
 }
 
 button{
@@ -49,13 +47,8 @@ button{
     background: linear-gradient(135deg, #ff8a00, #e52e71);
     color: #fff;
     cursor: pointer;
-    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
-    transition: all 0.3s ease;
-}
-
-button:hover{
-    transform: translateY(-3px) scale(1.05);
-    box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+    z-index: 9999;
+    position: relative;
 }
 
 #legenda{
@@ -69,16 +62,14 @@ button:hover{
     font-size: 1.3rem;
     max-width: 75%;
     text-align: center;
-    line-height: 1.5;
     opacity: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    backdrop-filter: blur(8px);
+    transition: opacity 0.3s ease;
     white-space: pre-wrap;
+    cursor: pointer;
 }
 
 #legenda.show{
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
 }
 
 .vw-plugin-wrapper {
@@ -118,11 +109,11 @@ recognition.continuous = true;
 recognition.interimResults = true;
 
 let timeoutLegenda;
-let ativo = false; // controla se o microfone está ativo
+let ativo = false;
 
 const startBtn = document.getElementById("start");
 
-// Botão liga/desliga microfone
+// BOTÃO LIGA/DESLIGA
 startBtn.onclick = () => {
     if(!ativo){
         recognition.start();
@@ -133,15 +124,16 @@ startBtn.onclick = () => {
         ativo = false;
         startBtn.innerText = "Iniciar Microfone";
     }
-}
+};
 
-// Recebe resultados de fala
+// RESULTADO DA VOZ
 recognition.onresult = (event) => {
     let textoFinal = "";
     let textoParcial = "";
 
     for(let i = event.resultIndex; i < event.results.length; i++){
         let transcript = event.results[i][0].transcript;
+
         if(event.results[i].isFinal){
             textoFinal += transcript + " ";
         } else {
@@ -154,11 +146,12 @@ recognition.onresult = (event) => {
     if(texto.length > 0){
         mostrarLegenda(texto);
     }
-}
+};
 
-// Mostra legenda na tela
+// MOSTRAR LEGENDA + FORÇAR VLIBRAS
 function mostrarLegenda(texto){
     const legenda = document.getElementById("legenda");
+
     legenda.innerText = texto;
     legenda.classList.add("show");
 
@@ -166,24 +159,32 @@ function mostrarLegenda(texto){
     timeoutLegenda = setTimeout(()=>{
         legenda.classList.remove("show");
     },3500);
+
+    // 🔥 força o VLibras a traduzir SOMENTE a legenda
+    setTimeout(() => {
+        legenda.click();
+    }, 100);
 }
 
-// Reinicia apenas se o microfone estiver ativo
+// CONTROLE DE REINÍCIO
 recognition.onend = () => {
-    if(ativo){
-        recognition.start();
+    if (ativo) {
+        setTimeout(() => {
+            if (ativo) recognition.start();
+        }, 200);
     }
-}
+};
 
-// Tratamento de erros
+// ERROS
 recognition.onerror = (event) => {
     console.error("Erro:", event.error);
+
     if(event.error === "not-allowed" || event.error === "not-found"){
         alert("Microfone não disponível ou permissão negada!");
         ativo = false;
         startBtn.innerText = "Iniciar Microfone";
     }
-}
+};
 </script>
 
 </body>
