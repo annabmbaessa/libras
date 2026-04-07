@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Tradutor Voz → Libras</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    background: linear-gradient(135deg, #6a0dad, #00c6ff);
+    color: #fff;
+    font-family: 'Roboto', Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    text-align: center;
+    overflow: hidden;
+}
+
+h1{
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+}
+
+p{
+    font-size: 1.25rem;
+    margin-bottom: 40px;
+    color: rgba(255,255,255,0.85);
+}
+
+button{
+    margin-top: 20px;
+    padding: 18px 50px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #ff8a00, #e52e71);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transition: all 0.3s ease;
+}
+
+button:hover{
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.35);
+}
+
+#legenda{
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    padding: 18px 35px;
+    border-radius: 20px;
+    font-size: 1.3rem;
+    max-width: 75%;
+    text-align: center;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    backdrop-filter: blur(8px);
+    white-space: pre-wrap;
+}
+
+#legenda.show{
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+.vw-plugin-wrapper {
+    bottom: 20px !important;
+    right: 20px !important;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🎤 Voz para Libras Automático</h1>
+<p>Fale normalmente e veja a tradução em Libras</p>
+
+<button id="start">Iniciar Microfone</button>
+
+<div id="legenda"></div>
+
+<!-- VLibras -->
+<div vw class="enabled">
+  <div vw-access-button class="active"></div>
+  <div vw-plugin-wrapper>
+    <div class="vw-plugin-top-wrapper"></div>
+  </div>
+</div>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+
+<script>
+new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+
+recognition.lang = "pt-BR";
+recognition.continuous = true;
+recognition.interimResults = true;
+
+let timeoutLegenda;
+let ativo = false; // controla se o microfone está ativo
+
+const startBtn = document.getElementById("start");
+
+// Botão liga/desliga microfone
+startBtn.onclick = () => {
+    if(!ativo){
+        recognition.start();
+        ativo = true;
+        startBtn.innerText = "Parar Microfone";
+    } else {
+        recognition.stop();
+        ativo = false;
+        startBtn.innerText = "Iniciar Microfone";
+    }
+}
+
+// Recebe resultados de fala
+recognition.onresult = (event) => {
+    let textoFinal = "";
+    let textoParcial = "";
+
+    for(let i = event.resultIndex; i < event.results.length; i++){
+        let transcript = event.results[i][0].transcript;
+        if(event.results[i].isFinal){
+            textoFinal += transcript + " ";
+        } else {
+            textoParcial += transcript;
+        }
+    }
+
+    let texto = (textoFinal + textoParcial).trim();
+
+    if(texto.length > 0){
+        mostrarLegenda(texto);
+    }
+}
+
+// Mostra legenda na tela
+function mostrarLegenda(texto){
+    const legenda = document.getElementById("legenda");
+    legenda.innerText = texto;
+    legenda.classList.add("show");
+
+    clearTimeout(timeoutLegenda);
+    timeoutLegenda = setTimeout(()=>{
+        legenda.classList.remove("show");
+    },3500);
+}
+
+// Reinicia apenas se o microfone estiver ativo
+recognition.onend = () => {
+    if(ativo){
+        recognition.start();
+    }
+}
+
+// Tratamento de erros
+recognition.onerror = (event) => {
+    console.error("Erro:", event.error);
+    if(event.error === "not-allowed" || event.error === "not-found"){
+        alert("Microfone não disponível ou permissão negada!");
+        ativo = false;
+        startBtn.innerText = "Iniciar Microfone";
+    }
+}
+</script>
+
+</body>
+</html>
