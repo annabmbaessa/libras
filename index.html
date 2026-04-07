@@ -2,58 +2,101 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Tradutor Voz → Libras</title>
+<title>Voz → Libras</title>
 
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
-
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
 body{
-    background: linear-gradient(135deg, #6a0dad, #00c6ff);
-    color: #fff;
-    font-family: 'Roboto', Arial, sans-serif;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    text-align: center;
-    overflow: hidden;
+    margin:0;
+    height:100vh;
+    display:flex;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e3a8a);
+    color:white;
 }
 
-h1{
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 10px;
+/* LADO ESQUERDO */
+.left{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
 }
 
-p{
-    font-size: 1.25rem;
-    margin-bottom: 40px;
+.mic{
+    width:160px;
+    height:160px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#111;
+    box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    transition:0.3s;
 }
 
-/* 🔥 BOTÃO SEMPRE CLICÁVEL */
+.mic.ativo{
+    box-shadow: 0 0 40px #22c55e;
+}
+
+.mic img{
+    width:80px;
+}
+
+.status{
+    margin-top:20px;
+    font-size:1.2rem;
+    opacity:0.8;
+}
+
 button{
-    position: fixed;
-    top: 30px;
-    z-index: 999999;
-
-    padding: 18px 50px;
-    font-size: 1.25rem;
-    font-weight: 700;
-    border: none;
-    border-radius: 30px;
-    background: linear-gradient(135deg, #ff8a00, #e52e71);
-    color: #fff;
-    cursor: pointer;
+    margin-top:30px;
+    padding:15px 40px;
+    border:none;
+    border-radius:30px;
+    font-size:1rem;
+    cursor:pointer;
+    background:#3b82f6;
+    color:white;
 }
 
-/* 🔥 BLOQUEIA INTERFERÊNCIA DO VLIBRAS */
+/* LADO DIREITO */
+.right{
+    flex:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+}
+
+.box{
+    width:350px;
+    height:350px;
+    border:3px solid #fbbf24;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+}
+
+/* LEGENDA */
+#legenda{
+    position:absolute;
+    bottom:-80px;
+    background: rgba(0,0,0,0.7);
+    padding:10px 20px;
+    border-radius:10px;
+    max-width:300px;
+    text-align:center;
+    opacity:0;
+    transition:0.3s;
+}
+
+#legenda.show{
+    opacity:1;
+}
+
+/* VLibras não travar clique */
 [vw] {
     pointer-events: none;
 }
@@ -62,43 +105,26 @@ button{
 .vw-plugin-wrapper {
     pointer-events: auto;
 }
-
-#legenda{
-    position: fixed;
-    bottom: 50px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: rgba(0,0,0,0.7);
-    padding: 18px 35px;
-    border-radius: 20px;
-    font-size: 1.3rem;
-    max-width: 75%;
-    text-align: center;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-    white-space: pre-wrap;
-    cursor: pointer;
-}
-
-#legenda.show{
-    opacity: 1;
-}
-
-.vw-plugin-wrapper {
-    bottom: 20px !important;
-    right: 20px !important;
-}
 </style>
 </head>
 
 <body>
 
-<h1>🎤 Voz para Libras Automático</h1>
-<p>Fale normalmente e veja a tradução em Libras</p>
+<div class="left">
+    <div id="mic" class="mic">
+        <img src="https://cdn-icons-png.flaticon.com/512/61/61088.png">
+    </div>
 
-<button id="start">Iniciar Microfone</button>
+    <div id="status" class="status">Microfone desligado</div>
 
-<div id="legenda"></div>
+    <button id="btn">Iniciar</button>
+</div>
+
+<div class="right">
+    <div class="box">
+        <div id="legenda"></div>
+    </div>
+</div>
 
 <!-- VLibras -->
 <div vw class="enabled">
@@ -120,25 +146,31 @@ recognition.lang = "pt-BR";
 recognition.continuous = true;
 recognition.interimResults = true;
 
-let timeoutLegenda;
 let ativo = false;
+let timeoutLegenda;
 
-const startBtn = document.getElementById("start");
+const btn = document.getElementById("btn");
+const mic = document.getElementById("mic");
+const status = document.getElementById("status");
 
-// BOTÃO LIGA/DESLIGA
-startBtn.onclick = () => {
+// BOTÃO
+btn.onclick = () => {
     if(!ativo){
         recognition.start();
         ativo = true;
-        startBtn.innerText = "Parar Microfone";
+        btn.innerText = "Parar";
+        status.innerText = "Microfone ativo";
+        mic.classList.add("ativo");
     } else {
         recognition.stop();
         ativo = false;
-        startBtn.innerText = "Iniciar Microfone";
+        btn.innerText = "Iniciar";
+        status.innerText = "Microfone desligado";
+        mic.classList.remove("ativo");
     }
 };
 
-// RESULTADO DA VOZ
+// VOZ → TEXTO
 recognition.onresult = (event) => {
     let textoFinal = "";
     let textoParcial = "";
@@ -160,7 +192,7 @@ recognition.onresult = (event) => {
     }
 };
 
-// MOSTRAR LEGENDA + FORÇAR TRADUÇÃO
+// MOSTRAR LEGENDA + VLIBRAS
 function mostrarLegenda(texto){
     const legenda = document.getElementById("legenda");
 
@@ -170,31 +202,33 @@ function mostrarLegenda(texto){
     clearTimeout(timeoutLegenda);
     timeoutLegenda = setTimeout(()=>{
         legenda.classList.remove("show");
-    },3500);
+    },4000);
 
-    // força VLibras a traduzir só a legenda
+    // força VLibras ler só isso
     setTimeout(() => {
         legenda.click();
-    }, 100);
+    },100);
 }
 
-// CONTROLE DE REINÍCIO
+// CONTROLE
 recognition.onend = () => {
-    if (ativo) {
-        setTimeout(() => {
-            if (ativo) recognition.start();
-        }, 200);
+    if(ativo){
+        setTimeout(()=>{
+            if(ativo) recognition.start();
+        },200);
     }
 };
 
 // ERROS
 recognition.onerror = (event) => {
-    console.error("Erro:", event.error);
+    console.error(event.error);
 
     if(event.error === "not-allowed" || event.error === "not-found"){
-        alert("Microfone não disponível ou permissão negada!");
+        alert("Microfone não disponível ou bloqueado");
         ativo = false;
-        startBtn.innerText = "Iniciar Microfone";
+        btn.innerText = "Iniciar";
+        status.innerText = "Microfone desligado";
+        mic.classList.remove("ativo");
     }
 };
 </script>
