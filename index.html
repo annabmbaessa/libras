@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Voz → Libras</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:'Roboto', Arial, sans-serif;
+}
+
+body{
+    height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    padding-left:80px;
+    background: linear-gradient(135deg, #6a0dad, #00c6ff);
+    color:#fff;
+}
+
+/* MIC */
+.mic{
+    width:140px;
+    height:140px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#111;
+    cursor:pointer;
+    transition:0.3s;
+    box-shadow: 0 0 20px rgba(0,0,0,0.3);
+}
+
+.mic.ativo{
+    box-shadow: 0 0 40px #22c55e;
+    transform: scale(1.08);
+}
+
+.mic img{
+    width:70px;
+    pointer-events:none;
+}
+
+/* STATUS */
+#status{
+    margin-left:40px;
+    font-size:1.2rem;
+    opacity:0.9;
+}
+
+/* LEGENDA (do seu sistema original melhorado visualmente) */
+#legenda{
+    position:fixed;
+    bottom:50px;
+    left:50%;
+    transform:translateX(-50%);
+    background: rgba(0,0,0,0.7);
+    padding:18px 35px;
+    border-radius:20px;
+    font-size:1.3rem;
+    max-width:75%;
+    text-align:center;
+    line-height:1.5;
+    opacity:0;
+    transition:0.3s;
+    backdrop-filter: blur(8px);
+    white-space: pre-line;
+}
+
+#legenda.show{
+    opacity:1;
+}
+
+/* VLibras */
+[vw],
+[vw-access-button],
+.vw-plugin-wrapper{
+    pointer-events:auto !important;
+}
+</style>
+</head>
+
+<body>
+
+<!-- MIC + STATUS -->
+<div style="display:flex; align-items:center;">
+    <div id="mic" class="mic">
+        <img src="https://cdn-icons-png.flaticon.com/512/61/61088.png">
+    </div>
+
+    <div id="status">Ativar microfone</div>
+</div>
+
+<div id="legenda"></div>
+
+<!-- VLibras -->
+<div vw class="enabled">
+  <div vw-access-button class="active"></div>
+  <div vw-plugin-wrapper>
+    <div class="vw-plugin-top-wrapper"></div>
+  </div>
+</div>
+
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+
+<script>
+new window.VLibras.Widget('https://vlibras.gov.br/app');
+
+/* Speech Recognition (MESMA LÓGICA DO SEU ORIGINAL) */
+const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+const recognition = new SpeechRecognition();
+
+recognition.lang = "pt-BR";
+recognition.continuous = true;
+recognition.interimResults = true;
+
+let ativo = false;
+let timeoutLegenda;
+
+const mic = document.getElementById("mic");
+const status = document.getElementById("status");
+
+/* LIGA / DESLIGA */
+mic.onclick = () => {
+    if(!ativo){
+        recognition.start();
+        ativo = true;
+        mic.classList.add("ativo");
+        status.innerText = "Desligar microfone";
+    } else {
+        recognition.stop();
+        ativo = false;
+        mic.classList.remove("ativo");
+        status.innerText = "Ativar microfone";
+    }
+};
+
+/* VOZ → TEXTO (MESMA LÓGICA DO 1) */
+recognition.onresult = (event) => {
+    let textoFinal = "";
+    let textoParcial = "";
+
+    for(let i = event.resultIndex; i < event.results.length; i++){
+        let transcript = event.results[i][0].transcript;
+
+        if(event.results[i].isFinal){
+            textoFinal += transcript + " ";
+        } else {
+            textoParcial += transcript;
+        }
+    }
+
+    let texto = (textoFinal + textoParcial).trim();
+
+    if(texto.length > 0){
+        mostrarLegenda(texto);
+    }
+};
+
+/* LEGENDA (do seu sistema original) */
+function mostrarLegenda(texto){
+    const legenda = document.getElementById("legenda");
+
+    if(texto.length > 60){
+        let meio = Math.floor(texto.length / 2);
+        let quebra = texto.lastIndexOf(" ", meio);
+        if(quebra !== -1){
+            texto = texto.slice(0, quebra) + "\n" + texto.slice(quebra + 1);
+        }
+    }
+
+    legenda.innerText = texto;
+    legenda.classList.add("show");
+
+    clearTimeout(timeoutLegenda);
+    timeoutLegenda = setTimeout(()=>{
+        legenda.classList.remove("show");
+    },3500);
+
+    legenda.click();
+}
+
+/* REINÍCIO AUTOMÁTICO */
+recognition.onend = () => {
+    if(ativo){
+        setTimeout(()=> recognition.start(), 200);
+    }
+};
+
+/* ERROS */
+recognition.onerror = (event) => {
+    console.error(event.error);
+
+    if(event.error === "not-allowed"){
+        alert("Permissão do microfone negada!");
+        ativo = false;
+        mic.classList.remove("ativo");
+        status.innerText = "Ativar microfone";
+    }
+};
+</script>
+
+</body>
+</html>
