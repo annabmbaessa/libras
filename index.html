@@ -55,7 +55,7 @@ body{
     opacity:0.9;
 }
 
-/* LEGENDA (do seu sistema original melhorado visualmente) */
+/* LEGENDA */
 #legenda{
     position:fixed;
     bottom:50px;
@@ -113,7 +113,7 @@ body{
 <script>
 new window.VLibras.Widget('https://vlibras.gov.br/app');
 
-/* Speech Recognition (MESMA LÓGICA DO SEU ORIGINAL) */
+/* Speech Recognition */
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
@@ -124,10 +124,14 @@ recognition.interimResults = true;
 let ativo = false;
 let timeoutLegenda;
 
+/* 🔥 FILA VLIBRAS */
+let filaVLibras = [];
+let vlibrasRodando = false;
+
 const mic = document.getElementById("mic");
 const status = document.getElementById("status");
 
-/* LIGA / DESLIGA */
+/* MIC ON/OFF */
 mic.onclick = () => {
     if(!ativo){
         recognition.start();
@@ -142,7 +146,7 @@ mic.onclick = () => {
     }
 };
 
-/* VOZ → TEXTO (MESMA LÓGICA DO 1) */
+/* VOZ → TEXTO */
 recognition.onresult = (event) => {
     let textoFinal = "";
     let textoParcial = "";
@@ -164,7 +168,7 @@ recognition.onresult = (event) => {
     }
 };
 
-/* LEGENDA (do seu sistema original) */
+/* LEGENDA + FILA VLIBRAS */
 function mostrarLegenda(texto){
     const legenda = document.getElementById("legenda");
 
@@ -184,10 +188,35 @@ function mostrarLegenda(texto){
         legenda.classList.remove("show");
     },3500);
 
-    legenda.click();
+    // 🔥 entra na fila do VLibras
+    filaVLibras.push(texto);
+    processarFilaVLibras();
 }
 
-/* REINÍCIO AUTOMÁTICO */
+/* 🔥 PROCESSA FILA VLIBRAS (não interrompe fala anterior) */
+function processarFilaVLibras(){
+    if(vlibrasRodando) return;
+    if(filaVLibras.length === 0) return;
+
+    vlibrasRodando = true;
+
+    const texto = filaVLibras.shift();
+
+    const btn = document.querySelector('[vw-access-button]');
+    if(btn){
+        btn.click();
+    }
+
+    // tempo estimado de execução da Libras
+    const tempo = Math.min(6000, 2000 + texto.length * 80);
+
+    setTimeout(() => {
+        vlibrasRodando = false;
+        processarFilaVLibras();
+    }, tempo);
+}
+
+/* REINÍCIO */
 recognition.onend = () => {
     if(ativo){
         setTimeout(()=> recognition.start(), 200);
