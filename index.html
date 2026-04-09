@@ -16,33 +16,68 @@ body{
     background: linear-gradient(135deg, #0f172a, #1e3a8a);
 }
 
-/* 🎤 BOTÃO MIC */
+/* 🔥 CONTAINER */
+.container{
+    display:flex;
+    align-items:center;
+    gap:30px;
+}
+
+/* 🎤 MIC CSS */
 .mic{
     width:140px;
     height:140px;
     border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, #2b2b2b, #000);
     display:flex;
     align-items:center;
     justify-content:center;
-    background:#111;
     cursor:pointer;
+    position:relative;
     transition:0.3s;
     box-shadow: 0 0 20px rgba(255,255,255,0.1);
 }
 
+/* corpo do microfone */
+.mic::before{
+    content:"";
+    width:40px;
+    height:60px;
+    background:#bbb;
+    border-radius:20px;
+    position:absolute;
+}
+
+/* base */
+.mic::after{
+    content:"";
+    width:70px;
+    height:10px;
+    background:#bbb;
+    position:absolute;
+    bottom:35px;
+    border-radius:10px;
+}
+
+/* 🎤 ANIMAÇÃO ATIVO */
 .mic.ativo{
     box-shadow: 0 0 40px #22c55e;
     transform: scale(1.08);
 }
 
-.mic img{
-    width:70px;
-    pointer-events:none;
+.mic.ativo::before{
+    background:#22c55e;
+    animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+    0%{ transform: scale(1); }
+    50%{ transform: scale(1.1); }
+    100%{ transform: scale(1); }
 }
 
 /* STATUS */
 #status{
-    margin-left:40px;
     font-size:1.2rem;
     color:white;
     opacity:0.9;
@@ -81,12 +116,8 @@ body{
 
 <body>
 
-<!-- 🎤 MIC -->
-<div style="display:flex; align-items:center;">
-    <div id="mic" class="mic">
-        <img src="file:///C:/Users/admin/Downloads/Design_sem_nome-removebg-preview.png">
-    </div>
-
+<div class="container">
+    <div id="mic" class="mic"></div>
     <div id="status">Ativar microfone</div>
 </div>
 
@@ -104,16 +135,6 @@ body{
 
 <script>
 new window.VLibras.Widget('https://vlibras.gov.br/app');
-
-/* 🔥 TENTA ATIVAR VLIBRAS AUTOMATICAMENTE */
-window.addEventListener("load", () => {
-    setTimeout(() => {
-        const btn = document.querySelector('[vw-access-button]');
-        if(btn){
-            btn.click();
-        }
-    }, 1200);
-});
 
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
@@ -204,7 +225,6 @@ recognition.onerror = (event) => {
     console.error(event.error);
 
     if(event.error === "not-allowed"){
-        alert("Permissão do microfone negada!");
         ativo = false;
         mic.classList.remove("ativo");
         status.innerText = "Ativar microfone";
