@@ -16,7 +16,7 @@ body{
     background: linear-gradient(135deg, #0f172a, #1e3a8a);
 }
 
-/* 🎤 MICROFONE */
+/* 🎤 BOTÃO MICROFONE */
 .mic{
     width:140px;
     height:140px;
@@ -28,16 +28,22 @@ body{
     cursor:pointer;
     transition:0.3s;
     box-shadow: 0 0 20px rgba(255,255,255,0.1);
+    user-select:none;
+    -webkit-user-drag:none;
 }
 
+/* ativo */
 .mic.ativo{
     box-shadow: 0 0 40px #22c55e;
     transform: scale(1.08);
 }
 
+/* imagem */
 .mic img{
     width:70px;
     pointer-events:none;
+    user-select:none;
+    -webkit-user-drag:none;
 }
 
 /* TEXTO STATUS */
@@ -70,7 +76,12 @@ body{
     opacity:1;
 }
 
-/* VLibras clicável */
+/* 🔥 VLibras não interfere no mic */
+#mic{
+    speak: none;
+}
+
+/* VLibras totalmente clicável */
 [vw],
 [vw-access-button],
 .vw-plugin-wrapper {
@@ -83,8 +94,8 @@ body{
 
 <!-- 🎤 BOTÃO + TEXTO -->
 <div style="display:flex; align-items:center;">
-    <div id="mic" class="mic">
-        <img src="https://png.pngtree.com/png-vector/20190329/ourmid/pngtree-vector-microphone-icon-png-image_889551.jpg">
+    <div id="mic" class="mic" aria-hidden="true">
+        <img src="https://cdn-icons-png.flaticon.com/512/61/61088.png">
     </div>
 
     <div id="status">Ativar microfone</div>
@@ -118,7 +129,7 @@ let timeoutLegenda;
 const mic = document.getElementById("mic");
 const status = document.getElementById("status");
 
-// 🎤 LIGA / DESLIGA + TEXTO DINÂMICO
+/* 🎤 LIGA / DESLIGA */
 mic.onclick = () => {
     if(!ativo){
         recognition.start();
@@ -133,7 +144,7 @@ mic.onclick = () => {
     }
 };
 
-// VOZ → TEXTO
+/* VOZ → TEXTO */
 recognition.onresult = (event) => {
     let textoFinal = "";
     let textoParcial = "";
@@ -155,7 +166,7 @@ recognition.onresult = (event) => {
     }
 };
 
-// LEGENDA
+/* LEGENDA */
 function mostrarLegenda(texto){
     const legenda = document.getElementById("legenda");
 
@@ -178,9 +189,9 @@ function mostrarLegenda(texto){
     setTimeout(() => {
         legenda.click();
     },100);
-}
+};
 
-// REINÍCIO CONTROLADO
+/* REINÍCIO CONTROLADO */
 recognition.onend = () => {
     if(ativo){
         setTimeout(()=>{
@@ -189,7 +200,7 @@ recognition.onend = () => {
     }
 };
 
-// ERROS
+/* ERROS */
 recognition.onerror = (event) => {
     console.error(event.error);
 
