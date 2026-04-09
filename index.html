@@ -10,90 +10,53 @@ body{
     height:100vh;
     display:flex;
     align-items:center;
-    justify-content:flex-start;
-    padding-left:80px;
+    justify-content:center;
     font-family: Arial, sans-serif;
     background: linear-gradient(135deg, #0f172a, #1e3a8a);
 }
 
-/* CONTAINER */
+/* CONTAINER CENTRAL */
 .container{
     display:flex;
+    flex-direction:column;
     align-items:center;
-    gap:40px;
+    justify-content:center;
+    gap:15px;
 }
 
 /* 🎤 MIC */
 .mic{
-    width:140px;
-    height:140px;
+    width:150px;
+    height:150px;
     border-radius:50%;
-    background: radial-gradient(circle at 30% 30%, #2b2b2b, #000);
     display:flex;
     align-items:center;
     justify-content:center;
+    background:#111;
     cursor:pointer;
-    position:relative;
+    transition:0.3s;
     box-shadow: 0 0 20px rgba(255,255,255,0.1);
 }
 
-/* corpo mic */
-.mic::before{
-    content:"";
-    width:40px;
-    height:60px;
-    background:#bbb;
-    border-radius:20px;
-    position:absolute;
-}
-
-/* base */
-.mic::after{
-    content:"";
-    width:70px;
-    height:10px;
-    background:#bbb;
-    position:absolute;
-    bottom:35px;
-    border-radius:10px;
-}
-
-/* ativo */
 .mic.ativo{
     box-shadow: 0 0 40px #22c55e;
     transform: scale(1.08);
 }
 
-/* ondas */
-.wave{
-    position:absolute;
-    border:2px solid #22c55e;
-    border-radius:50%;
-    opacity:0;
+/* ÍCONE */
+.mic img{
+    width:70px;
+    pointer-events:none;
 }
 
-.wave1{ width:160px; height:160px; }
-.wave2{ width:190px; height:190px; }
-.wave3{ width:220px; height:220px; }
-
-@keyframes waveAnim{
-    0%{ transform:scale(0.8); opacity:0.6; }
-    100%{ transform:scale(1.4); opacity:0; }
-}
-
-.mic.ativo .wave{
-    animation: waveAnim 1.5s infinite;
-}
-
-.mic.ativo .wave1{ animation-delay:0s; }
-.mic.ativo .wave2{ animation-delay:0.3s; }
-.mic.ativo .wave3{ animation-delay:0.6s; }
-
-/* STATUS */
+/* TEXTO */
 #status{
-    font-size:1.2rem;
+    font-size:1.3rem;
     color:white;
+    font-weight:500;
+    letter-spacing:0.5px;
     opacity:0.9;
+    text-align:center;
 }
 
 /* LEGENDA */
@@ -114,9 +77,11 @@ body{
     white-space: pre-line;
 }
 
-#legenda.show{ opacity:1; }
+#legenda.show{
+    opacity:1;
+}
 
-/* VLibras livre */
+/* VLibras */
 [vw],
 [vw-access-button],
 .vw-plugin-wrapper {
@@ -128,15 +93,13 @@ body{
 <body>
 
 <div class="container">
+
     <div id="mic" class="mic">
-
-        <div class="wave wave1"></div>
-        <div class="wave wave2"></div>
-        <div class="wave wave3"></div>
-
+        <img src="https://cdn-icons-png.flaticon.com/512/61/61088.png">
     </div>
 
     <div id="status">Ativar microfone</div>
+
 </div>
 
 <div id="legenda"></div>
@@ -154,31 +117,14 @@ body{
 <script>
 new window.VLibras.Widget('https://vlibras.gov.br/app');
 
-/* 🔥 AUTO ATTEMPT (VERSÃO MAIS FORTE) */
-function tentarAutoVLibras(){
-    let tentativas = 0;
-
-    const intervalo = setInterval(() => {
-        const btn = document.querySelector('[vw-access-button]');
-
-        if(btn){
-            btn.click();
-            clearInterval(intervalo);
-        }
-
-        tentativas++;
-        if(tentativas > 10){
-            clearInterval(intervalo);
-        }
-
-    }, 800);
-}
-
+/* AUTO TENTATIVA VLIBRAS */
 window.addEventListener("load", () => {
-    setTimeout(tentarAutoVLibras, 1000);
+    setTimeout(() => {
+        const btn = document.querySelector('[vw-access-button]');
+        if(btn) btn.click();
+    }, 1200);
 });
 
-/* MICROFONE */
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
@@ -192,13 +138,13 @@ let timeoutLegenda;
 const mic = document.getElementById("mic");
 const status = document.getElementById("status");
 
-/* LIGA / DESLIGA */
+/* 🎤 LIGA / DESLIGA */
 mic.onclick = () => {
     if(!ativo){
         recognition.start();
         ativo = true;
         mic.classList.add("ativo");
-        status.innerText = "Desligar microfone";
+        status.innerText = "Desativar microfone";
     } else {
         recognition.stop();
         ativo = false;
@@ -252,23 +198,14 @@ function mostrarLegenda(texto){
     setTimeout(() => {
         legenda.click();
     },100);
-}
+};
 
 /* REINÍCIO */
 recognition.onend = () => {
     if(ativo){
         setTimeout(()=>{
-            if(ativo) recognition.start();
+            recognition.start();
         },200);
-    }
-};
-
-/* ERROS */
-recognition.onerror = (event) => {
-    if(event.error === "not-allowed"){
-        ativo = false;
-        mic.classList.remove("ativo");
-        status.innerText = "Ativar microfone";
     }
 };
 </script>
