@@ -23,7 +23,7 @@ body{
     gap:18px;
 }
 
-/* 🎤 MIC REALISTA */
+/* 🎤 MIC */
 .mic{
     width:150px;
     height:150px;
@@ -31,80 +31,76 @@ body{
     cursor:pointer;
     position:relative;
 
-    /* base realista (metal escuro) */
     background: radial-gradient(circle at 35% 30%, #2c2f36, #0e1117 70%);
 
-    /* sombra real */
     box-shadow:
-        0 10px 25px rgba(0,0,0,0.6),
+        0 12px 28px rgba(0,0,0,0.65),
         inset 0 2px 10px rgba(255,255,255,0.05),
-        inset 0 -4px 10px rgba(0,0,0,0.6);
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
+        inset 0 -6px 12px rgba(0,0,0,0.6);
 
     transition:0.25s ease;
 }
 
-/* grade do microfone (realista) */
+/* grelha do mic */
 .mic::before{
     content:"";
     position:absolute;
-    width:55px;
-    height:75px;
+    top:28px;
+    left:50%;
+    transform:translateX(-50%);
+    width:58px;
+    height:70px;
     border-radius:18px;
 
     background:
         repeating-linear-gradient(
             90deg,
-            #d6d6d6 0px,
-            #d6d6d6 2px,
-            #9aa0a6 2px,
-            #9aa0a6 4px
+            #cfd3d8 0px,
+            #cfd3d8 2px,
+            #8b9096 2px,
+            #8b9096 4px
         );
 
-    opacity:0.9;
-
     box-shadow:
-        inset 0 2px 6px rgba(0,0,0,0.4),
+        inset 0 2px 6px rgba(0,0,0,0.5),
         inset 0 -2px 6px rgba(255,255,255,0.1);
 }
 
-/* base do microfone */
+/* base */
 .mic::after{
     content:"";
     position:absolute;
-    bottom:40px;
-    width:80px;
-    height:10px;
-    border-radius:10px;
+    bottom:-35px;
+    left:50%;
+    transform:translateX(-50%);
+    width:10px;
+    height:45px;
+    border-radius:6px;
 
-    background: linear-gradient(90deg, #8c8f96, #5f6368);
+    background: linear-gradient(180deg, #8c8f96, #3f434a);
 
-    box-shadow: 0 2px 6px rgba(0,0,0,0.5);
-}
-
-/* hover leve */
-.mic:hover{
-    transform: scale(1.04);
+    box-shadow: 0 5px 10px rgba(0,0,0,0.5);
 }
 
 /* ativo */
 .mic.ativo{
     box-shadow:
         0 0 25px rgba(80,160,255,0.35),
-        0 10px 25px rgba(0,0,0,0.6),
+        0 12px 28px rgba(0,0,0,0.65),
         inset 0 2px 10px rgba(255,255,255,0.05);
 }
 
 /* STATUS */
 #status{
-    font-size:1.25rem;
-    color:#e6e6e6;
+    font-size:1.15rem;
     font-weight:500;
-    letter-spacing:0.3px;
-    text-align:center;
+    color:#d6d6d6;
+
+    padding:6px 14px;
+    border-radius:999px;
+
+    background: rgba(255,255,255,0.04);
+    backdrop-filter: blur(6px);
 }
 
 /* LEGENDA */
@@ -130,7 +126,7 @@ body{
     opacity:1;
 }
 
-/* VLibras */
+/* VLibras NÃO bloquear clique */
 [vw],
 [vw-access-button],
 .vw-plugin-wrapper {
@@ -151,7 +147,7 @@ body{
 
 <div id="legenda"></div>
 
-<!-- VLibras -->
+<!-- VLibras (VERSÃO ESTÁVEL) -->
 <div vw class="enabled">
   <div vw-access-button class="active"></div>
   <div vw-plugin-wrapper>
@@ -162,15 +158,12 @@ body{
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 
 <script>
-new window.VLibras.Widget('https://vlibras.gov.br/app');
-
+/* VLibras inicialização correta */
 window.addEventListener("load", () => {
-    setTimeout(() => {
-        const btn = document.querySelector('[vw-access-button]');
-        if(btn) btn.click();
-    }, 1200);
+    new window.VLibras.Widget('https://vlibras.gov.br/app');
 });
 
+/* MICROFONE */
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
@@ -221,6 +214,7 @@ recognition.onresult = (event) => {
     }
 };
 
+/* LEGENDA */
 function mostrarLegenda(texto){
     const legenda = document.getElementById("legenda");
 
@@ -239,7 +233,7 @@ function mostrarLegenda(texto){
     timeoutLegenda = setTimeout(()=>{
         legenda.classList.remove("show");
     },3500);
-}
+};
 
 recognition.onend = () => {
     if(ativo){
