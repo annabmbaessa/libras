@@ -2,9 +2,17 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Voz → Libras</title>
+<title>Tradutor Voz → Libras</title>
 
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
 body{
     background: radial-gradient(circle at 20% 30%, #1e3a8a, #0b1a3a 40%, #020617 80%);
     color: #fff;
@@ -18,98 +26,166 @@ body{
     overflow: hidden;
 }
 
-/* 🔥 WRAPPER ISOLADO DO BOTÃO */
-#mic-wrapper{
-    display:flex;
-    align-items:center;
-    gap:40px;
-    position:relative;
+h1{
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 10px;
+    text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
 }
 
-/* 🎤 BOTÃO */
-.mic{
-    width:140px;
-    height:140px;
-    border-radius:50%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    background:#111;
-    cursor:pointer;
-    transition:0.3s;
-    box-shadow: 0 0 20px rgba(255,255,255,0.1);
+p{
+    font-size: 1.25rem;
+    margin-bottom: 40px;
+    color: rgba(255,255,255,0.85);
 }
 
-/* ativo */
-.mic.ativo{
-    box-shadow: 0 0 40px #22c55e;
-    transform: scale(1.08);
+button{
+    margin-top: 20px;
+    padding: 18px 50px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    border: none;
+    border-radius: 30px;
+    background: linear-gradient(135deg, #ff8a00, #e52e71);
+    color: #fff;
+    cursor: pointer;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transition: all 0.3s ease;
 }
 
-/* imagem */
-.mic img{
-    width:70px;
-    pointer-events:none;
-    user-select:none;
-    -webkit-user-drag:none;
+button:hover{
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 12px 25px rgba(0,0,0,0.35);
 }
 
-/* TEXTO */
-#status{
-    font-size:1.2rem;
-    color:white;
-    opacity:0.9;
-}
-
-/* LEGENDA */
 #legenda{
-    position:fixed;
-    bottom:40px;
-    left:50%;
-    transform:translateX(-50%);
+    position: fixed;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
     background: rgba(0,0,0,0.7);
-    padding:15px 25px;
-    border-radius:15px;
-    color:#fff;
-    font-size:1.2rem;
-    max-width:80%;
-    text-align:center;
-    opacity:0;
-    transition:0.3s;
+    padding: 18px 35px;
+    border-radius: 20px;
+    font-size: 1.3rem;
+    max-width: 75%;
+    text-align: center;
+    line-height: 1.5;
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    backdrop-filter: blur(8px);
     white-space: pre-line;
 }
 
 #legenda.show{
-    opacity:1;
+    opacity: 1;
 }
 
-/* 🔥 BLOQUEIO DE LEITURA DO BOTÃO */
-#mic-wrapper,
-#mic-wrapper *{
-    speak: none !important;
-    -webkit-user-select: none;
-    user-select: none;
+/* BOTÃO AJUDA */
+#helpBtn{
+    position: fixed;
+    top: 20px;
+    left: 20px;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+    font-size: 1.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    backdrop-filter: blur(6px);
+    transition: 0.3s;
+    z-index: 1000;
 }
 
-/* VLibras livre */
-[vw],
-[vw-access-button],
+#helpBtn:hover{
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.1);
+}
+
+/* MODAL */
+#helpModal{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.75);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: 0.3s;
+    z-index: 999;
+}
+
+#helpModal.show{
+    opacity: 1;
+    pointer-events: all;
+}
+
+#helpContent{
+    background: rgba(10,15,40,0.95);
+    padding: 30px;
+    border-radius: 20px;
+    max-width: 600px;
+    width: 90%;
+    color: #fff;
+    line-height: 1.6;
+    text-align: left;
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+}
+
+#closeHelp{
+    margin-top: 20px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px;
+    background: #e52e71;
+    color: #fff;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+#closeHelp:hover{
+    background: #ff4d8d;
+}
+
 .vw-plugin-wrapper {
-    pointer-events: auto !important;
+    bottom: 20px !important;
+    right: 20px !important;
 }
 </style>
 </head>
 
 <body>
 
-<!-- 🎤 BOTÃO ISOLADO -->
-<div id="mic-wrapper">
-    <div id="mic" class="mic">
-        <img src="https://cdn-icons-png.flaticon.com/512/61/61088.png">
-    </div>
+<!-- BOTÃO AJUDA -->
+<button id="helpBtn">?</button>
 
-    <div id="status">Ativar microfone</div>
+<!-- MODAL AJUDA -->
+<div id="helpModal">
+    <div id="helpContent">
+        <h2>Como usar o site</h2>
+        <br>
+        <p>
+        🎤 Clique em “Iniciar Microfone” e permita o acesso.<br><br>
+        🗣️ Fale normalmente — o site transforma sua voz em texto em tempo real.<br><br>
+        📝 As legendas aparecem na parte inferior da tela.<br><br>
+        🤟 O VLibras traduz automaticamente para Libras.<br><br>
+        ⚠️ Funciona melhor no Google Chrome e com boa clareza de voz.
+        </p>
+
+        <button id="closeHelp">Fechar</button>
+    </div>
 </div>
+
+<h1>🎤 Voz para Libras Automático</h1>
+<p>Fale normalmente e veja a tradução em Libras</p>
+
+<button id="start">Iniciar Microfone</button>
 
 <div id="legenda"></div>
 
@@ -126,6 +202,62 @@ body{
 <script>
 new window.VLibras.Widget('https://vlibras.gov.br/app');
 
+/* AUTO VLIBRAS */
+function iniciarVLibrasAuto() {
+    let iniciado = false;
+
+    const tentarAtivar = () => {
+        const btn = document.querySelector('[vw-access-button]');
+        if (btn && !iniciado) {
+            btn.click();
+            iniciado = true;
+            observer.disconnect();
+        }
+    };
+
+    const observer = new MutationObserver(() => {
+        tentarAtivar();
+    });
+
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
+
+    let tentativas = 0;
+    const intervalo = setInterval(() => {
+        tentarAtivar();
+        tentativas++;
+
+        if (iniciado || tentativas > 20) {
+            clearInterval(intervalo);
+            observer.disconnect();
+        }
+    }, 300);
+}
+
+window.addEventListener("load", iniciarVLibrasAuto);
+
+/* HELP MODAL */
+const helpBtn = document.getElementById("helpBtn");
+const helpModal = document.getElementById("helpModal");
+const closeHelp = document.getElementById("closeHelp");
+
+helpBtn.onclick = () => {
+    helpModal.classList.add("show");
+};
+
+closeHelp.onclick = () => {
+    helpModal.classList.remove("show");
+};
+
+helpModal.onclick = (e) => {
+    if(e.target === helpModal){
+        helpModal.classList.remove("show");
+    }
+};
+
+/* SPEECH */
 const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 const recognition = new SpeechRecognition();
 
@@ -133,28 +265,12 @@ recognition.lang = "pt-BR";
 recognition.continuous = true;
 recognition.interimResults = true;
 
-let ativo = false;
 let timeoutLegenda;
 
-const mic = document.getElementById("mic");
-const status = document.getElementById("status");
-
-/* 🎤 LIGA / DESLIGA */
-mic.onclick = () => {
-    if(!ativo){
-        recognition.start();
-        ativo = true;
-        mic.classList.add("ativo");
-        status.innerText = "Desligar microfone";
-    } else {
-        recognition.stop();
-        ativo = false;
-        mic.classList.remove("ativo");
-        status.innerText = "Ativar microfone";
-    }
+document.getElementById("start").onclick = () => {
+    recognition.start();
 };
 
-/* VOZ → TEXTO */
 recognition.onresult = (event) => {
     let textoFinal = "";
     let textoParcial = "";
@@ -176,7 +292,6 @@ recognition.onresult = (event) => {
     }
 };
 
-/* LEGENDA */
 function mostrarLegenda(texto){
     const legenda = document.getElementById("legenda");
 
@@ -196,29 +311,17 @@ function mostrarLegenda(texto){
         legenda.classList.remove("show");
     },3500);
 
-    setTimeout(() => {
-        legenda.click();
-    },100);
+    legenda.click();
 }
 
-/* REINÍCIO CONTROLADO */
 recognition.onend = () => {
-    if(ativo){
-        setTimeout(()=>{
-            if(ativo) recognition.start();
-        },200);
-    }
+    recognition.start(); 
 };
 
-/* ERROS */
 recognition.onerror = (event) => {
-    console.error(event.error);
-
+    console.error("Erro:", event.error);
     if(event.error === "not-allowed"){
         alert("Permissão do microfone negada!");
-        ativo = false;
-        mic.classList.remove("ativo");
-        status.innerText = "Ativar microfone";
     }
 };
 </script>
