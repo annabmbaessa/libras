@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -25,6 +24,9 @@ body{
     height: 100vh;
     text-align: center;
     overflow: hidden;
+
+    /* 🔧 AJUSTE: move conteúdo central levemente para a esquerda */
+    padding-right: 60px;
 }
 
 h1{
@@ -32,16 +34,18 @@ h1{
     font-weight: 700;
     margin-bottom: 10px;
     text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+
     position: relative;
-    left: -18px;
+    left: -25px;
 }
 
 p{
     font-size: 1.25rem;
     margin-bottom: 40px;
     color: rgba(255,255,255,0.85);
+
     position: relative;
-    left: -18px;
+    left: -25px;
 }
 
 /* BOTÃO MIC */
@@ -61,6 +65,9 @@ p{
     align-items: center;
     justify-content: center;
     gap: 18px;
+
+    position: relative;
+    left: -25px;
 }
 
 #start:hover{
@@ -119,15 +126,11 @@ p{
     white-space: pre-line;
 }
 
-#legenda.show{
-    opacity: 1;
-}
-
-/* BOTÃO AJUDA */
+/* BOTÃO AJUDA (SEM MEXER) */
 #helpBtn{
     position: fixed;
     top: 20px;
-    left: 12px;
+    left: 20px;
     width: 55px;
     height: 55px;
     border-radius: 50%;
@@ -197,11 +200,6 @@ p{
 #closeHelp:hover{
     background: #ff4d8d;
 }
-
-.vw-plugin-wrapper {
-    bottom: 20px !important;
-    right: 20px !important;
-}
 </style>
 </head>
 
@@ -249,129 +247,7 @@ p{
 
 <script>
 new window.VLibras.Widget('https://vlibras.gov.br/app');
-
-function iniciarVLibrasAuto() {
-    let iniciado = false;
-
-    const tentarAtivar = () => {
-        const btn = document.querySelector('[vw-access-button]');
-        if (btn && !iniciado) {
-            btn.click();
-            iniciado = true;
-            observer.disconnect();
-        }
-    };
-
-    const observer = new MutationObserver(() => {
-        tentarAtivar();
-    });
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true
-    });
-
-    let tentativas = 0;
-    const intervalo = setInterval(() => {
-        tentarAtivar();
-        tentativas++;
-
-        if (iniciado || tentativas > 20) {
-            clearInterval(intervalo);
-            observer.disconnect();
-        }
-    }, 300);
-}
-
-window.addEventListener("load", iniciarVLibrasAuto);
-
-const helpBtn = document.getElementById("helpBtn");
-const helpModal = document.getElementById("helpModal");
-const closeHelp = document.getElementById("closeHelp");
-
-helpBtn.onclick = () => helpModal.classList.add("show");
-closeHelp.onclick = () => helpModal.classList.remove("show");
-
-helpModal.onclick = (e) => {
-    if(e.target === helpModal){
-        helpModal.classList.remove("show");
-    }
-};
-
-const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-const recognition = new SpeechRecognition();
-
-recognition.lang = "pt-BR";
-recognition.continuous = true;
-recognition.interimResults = true;
-
-let timeoutLegenda;
-let isListening = false;
-
-document.getElementById("start").onclick = () => {
-    if(!isListening){
-        recognition.start();
-        isListening = true;
-    } else {
-        recognition.stop();
-        isListening = false;
-    }
-};
-
-recognition.onresult = (event) => {
-    let textoFinal = "";
-    let textoParcial = "";
-
-    for(let i = event.resultIndex; i < event.results.length; i++){
-        let transcript = event.results[i][0].transcript;
-
-        if(event.results[i].isFinal){
-            textoFinal += transcript + " ";
-        } else {
-            textoParcial += transcript;
-        }
-    }
-
-    let texto = (textoFinal + textoParcial).trim();
-
-    if(texto.length > 0){
-        mostrarLegenda(texto);
-    }
-};
-
-function mostrarLegenda(texto){
-    const legenda = document.getElementById("legenda");
-
-    if(texto.length > 60){
-        let meio = Math.floor(texto.length / 2);
-        let quebra = texto.lastIndexOf(" ", meio);
-        if(quebra !== -1){
-            texto = texto.slice(0, quebra) + "\n" + texto.slice(quebra + 1);
-        }
-    }
-
-    legenda.innerText = texto;
-    legenda.classList.add("show");
-
-    clearTimeout(timeoutLegenda);
-    timeoutLegenda = setTimeout(()=>{
-        legenda.classList.remove("show");
-    },3500);
-
-    legenda.click();
-}
-
-recognition.onend = () => {
-    isListening = false;
-};
-
-recognition.onerror = (event) => {
-    if(event.error === "not-allowed"){
-        alert("Permissão do microfone negada!");
-    }
-};
 </script>
 
 </body>
 </html>
-```
