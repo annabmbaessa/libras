@@ -127,23 +127,17 @@ p{
     height: 55px;
     border-radius: 50%;
     border: none;
-
     background: radial-gradient(circle at 30% 30%, #ffd700, #b8860b);
-
     color: #1a1a1a;
     font-size: 1.6rem;
     font-weight: bold;
     cursor: pointer;
-
     display: flex;
     align-items: center;
     justify-content: center;
-
     box-shadow: 0 10px 30px rgba(0,0,0,0.4);
-
     transition: 0.3s;
     z-index: 1000;
-
     flex: 0 0 auto;
 }
 
@@ -308,9 +302,16 @@ recognition.continuous = true;
 recognition.interimResults = true;
 
 let timeoutLegenda;
+let isListening = false;
 
 document.getElementById("start").onclick = () => {
-    recognition.start();
+    if(!isListening){
+        recognition.start();
+        isListening = true;
+    } else {
+        recognition.stop();
+        isListening = false;
+    }
 };
 
 recognition.onresult = (event) => {
@@ -357,7 +358,7 @@ function mostrarLegenda(texto){
 }
 
 recognition.onend = () => {
-    recognition.start(); 
+    isListening = false;
 };
 
 recognition.onerror = (event) => {
