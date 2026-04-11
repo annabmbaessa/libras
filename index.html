@@ -31,15 +31,22 @@ h1{
     font-weight: 700;
     margin-bottom: 10px;
     text-shadow: 2px 2px 10px rgba(0,0,0,0.3);
+    text-transform: uppercase;
 }
 
+.gold{
+    background: radial-gradient(circle at 30% 30%, #fff2b0, #d4af37 40%, #8a6a00 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* resto do CSS */
 p{
     font-size: 1.25rem;
     margin-bottom: 40px;
     color: rgba(255,255,255,0.85);
 }
 
-/* BOTÃO MIC (SEM RETÂNGULO) */
 #start{
     background: transparent;
     border: none;
@@ -50,7 +57,6 @@ p{
     justify-content: center;
 }
 
-/* MIC CÍRCULO MAIOR */
 .mic-circle{
     width: 150px;
     height: 150px;
@@ -88,7 +94,6 @@ p{
     fill: #2b1d00;
 }
 
-/* LEGENDAS */
 #legenda{
     position: fixed;
     bottom: 50px;
@@ -111,7 +116,6 @@ p{
     opacity: 1;
 }
 
-/* BOTÃO AJUDA */
 #helpBtn{
     position: fixed;
     top: 20px;
@@ -137,7 +141,6 @@ p{
     transform: scale(1.12);
 }
 
-/* MODAL */
 #helpModal{
     position: fixed;
     top: 0;
@@ -213,7 +216,7 @@ p{
     </div>
 </div>
 
-<h1>MY LiBRaS</h1>
+<h1>MY LIBR<span class="gold">IA</span>S</h1>
 <p>Fale normalmente e veja a tradução em Libras</p>
 
 <button id="start">
